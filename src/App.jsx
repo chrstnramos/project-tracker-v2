@@ -107,6 +107,24 @@ function makeWeeks() {
 const defaultProject = () => ({ id: uid(), name: "STX Promo Automation", desc: "Q2 2026 Implementation Roadmap", team: defaultTeam, tags: defaultTags, weeks: makeWeeks() });
 const blankProject = () => ({ id: uid(), name: "New Project", desc: "Description", team: [{ id: uid(), name: "Lead", role: "Lead", color: "#818CF8" }], tags: [{ id: uid(), name: "General", color: "#818CF8" }], weeks: [{ id: uid(), num: 1, dates: "Week 1", objective: "Getting started", tasks: [] }] });
 
+function sanitize(data) {
+  if (!data || !data.projects) return data;
+  data.projects = Object.values(data.projects || {}).map(p => ({
+    ...p,
+    team: Array.isArray(p.team) ? p.team : Object.values(p.team || {}),
+    tags: Array.isArray(p.tags) ? p.tags : Object.values(p.tags || {}),
+    weeks: (Array.isArray(p.weeks) ? p.weeks : Object.values(p.weeks || {})).map(w => ({
+      ...w,
+      tasks: (Array.isArray(w.tasks) ? w.tasks : Object.values(w.tasks || {})).map(t => ({
+        ...t,
+        tags: Array.isArray(t.tags) ? t.tags : Object.values(t.tags || {}),
+      })),
+    })),
+  }));
+  return data;
+}
+
+
 // ── Storage ──
 import { saveData as saveStore, subscribeToData, isLiveSync } from "./storage.js";
 
