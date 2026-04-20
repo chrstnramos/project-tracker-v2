@@ -181,18 +181,28 @@ export default function App() {
   const initializedRef = useRef(false);
 
   // Subscribe to realtime data (Firebase = instant, localStorage = 3s poll)
-  useEffect(() => {
+useEffect(() => {
     const unsub = subscribeToData((d) => {
       if (d && d.projects) {
         setData(d);
-        if (!initializedRef.current) { setActiveId(d.activeId || d.projects[0]?.id); }
+        if (!initializedRef.current) {
+          setActiveId(d.activeId || d.projects[0]?.id);
+          initializedRef.current = true;
+          setLoaded(true);
+        } else if (d.activeId) {
+          setActiveId(prev => {
+            const exists = d.projects.some(p => p.id === prev);
+            return exists ? prev : (d.activeId || d.projects[0]?.id);
+          });
+        }
       } else if (!initializedRef.current) {
         const p = defaultProject();
         const init = { projects: [p], activeId: p.id };
         setData(init); setActiveId(p.id); saveStore(init);
+        initializedRef.current = true;
+        setLoaded(true);
       }
       setLastSync(new Date());
-      if (!initializedRef.current) { initializedRef.current = true; setLoaded(true); }
     });
     return typeof unsub === "function" ? unsub : () => {};
   }, []);
@@ -251,7 +261,7 @@ export default function App() {
 
   const cycleStatus = (wid, tid, current) => { const ks = Object.keys(STATUSES); upTask(wid, tid, { status: ks[(ks.indexOf(current) + 1) % ks.length] }); };
 
-  const addProject = () => { const p = blankProject(); const n = { ...data, projects: [...data.projects, p], activeId: p.id }; setActiveId(p.id); save(n); };
+  const addProject = () => { const p = blankProject(); const n = { ...data, projects: [...data.projects, p], activeId: p.id }; setActiveId(p.id); setFOwner("all"); setFStatus("all"); setFTag("all"); setSearch(""); setExpWeeks({}); setTeamView(null); setMemberPanel(null); setBoardWeek(""); save(n); };
   const delProject = pid => { const ps = data.projects.filter(p => p.id !== pid); const nid = ps[0]?.id || null; save({ ...data, projects: ps, activeId: nid }); setActiveId(nid); setConfirmDel(null); setShowSettings(false); };
   const switchProj = pid => { setActiveId(pid); save({ ...data, activeId: pid }); setExpWeeks({}); setFOwner("all"); setFStatus("all"); setFTag("all"); setSearch(""); };
 
