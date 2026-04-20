@@ -15,17 +15,17 @@ import { getDatabase, ref, set, onValue } from "firebase/database";
 
 // ⬇️ PASTE YOUR FIREBASE CONFIG HERE ⬇️
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDkx0swFAWjveRqPUBEJ1RgMEjZMqgMC1c",
+  authDomain: "stx-roadmap.firebaseapp.com",
+  databaseURL: "https://stx-roadmap-default-rtdb.firebaseio.com",
+  projectId: "stx-roadmap",
+  storageBucket: "stx-roadmap.firebasestorage.app",
+  messagingSenderId: "971441330456",
+  appId: "1:971441330456:web:c159a6290b12e66699666d"
 };
 
 // ⬇️ FLIP TO true AFTER ADDING YOUR CONFIG ⬇️
-const USE_FIREBASE = false;
+const USE_FIREBASE = true;
 
 // ── Initialize ──
 let db = null;
