@@ -25,7 +25,7 @@ const firebaseConfig = {
 };
 
 // ⬇️ FLIP TO true AFTER ADDING YOUR CONFIG ⬇️
-const USE_FIREBASE = true;
+const USE_FIREBASE = false;
 
 // ── Initialize ──
 let db = null;
