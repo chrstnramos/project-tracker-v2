@@ -301,7 +301,10 @@ Parse this into a task: ${aiText}`;
           })
         }
       );
-      const d = await res.json();
+      if (!res.ok) {
+  throw new Error(res.status === 429 ? "Rate limited — wait 60 seconds and try again" : `API error: ${res.status}`);
+}
+const d = await res.json();
       const txt = d.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const clean = txt.replace(/```json\s?|```/g, "").replace(/^[^{]*/, "").replace(/[^}]*$/, "").trim();
       const parsed = JSON.parse(clean);
