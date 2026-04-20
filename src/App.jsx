@@ -279,16 +279,43 @@ export default function App() {
   };
 
   // AI Parser
-  const parseAI = async () => {
+const parseAI = async () => {
     if (!aiText.trim() || !proj) return; setAiLoading(true);
     try {
-      const body = { model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content: `Parse this into a task. Team: ${proj.team.map(m => `${m.name}(${m.id})`).join(",")}. Tags: ${proj.tags.map(t => `${t.name}(${t.id})`).join(",")}. Priorities: none,low,medium,high,urgent. Respond with ONLY JSON: {"title":"","owner":"id_or_empty","priority":"","tags":["id"],"details":""}\n\n${aiText}` }] };
-      const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const prompt = `You are a task parser. Return ONLY raw JSON, no markdown, no backticks, no explanation.
+Schema: {"title":"string","owner":"team_id_or_empty","priority":"none|low|medium|high|urgent","tags":["tag_id"],"details":"string"}
+
+Team members: ${proj.team.map(m => m.name + "=" + m.id).join(", ")}
+Tags: ${proj.tags.map(t => t.name + "=" + t.id).join(", ")}
+
+Parse this into a task: ${aiText}`;
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.1 }
+          })
+        }
+      );
       const d = await res.json();
-      const txt = (d.content || []).find(b => b.type === "text")?.text || "";
-      const parsed = JSON.parse(txt.replace(/```json|```/g, "").trim());
-      setAiResult({ title: parsed.title || aiText, owner: parsed.owner || "", priority: parsed.priority || "none", tags: parsed.tags || [], details: parsed.details || "" });
-    } catch { setAiResult({ title: aiText, owner: "", priority: "none", tags: [], details: "Could not auto-parse. Edit manually." }); }
+      const txt = d.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      const clean = txt.replace(/```json\s?|```/g, "").replace(/^[^{]*/, "").replace(/[^}]*$/, "").trim();
+      const parsed = JSON.parse(clean);
+      setAiResult({
+        title: parsed.title || aiText,
+        owner: parsed.owner || "",
+        priority: parsed.priority || "none",
+        tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+        details: parsed.details || ""
+      });
+    } catch (e) {
+      console.error("AI parse error:", e);
+      setAiResult({ title: aiText, owner: "", priority: "none", tags: [], details: "Could not auto-parse. Edit manually." });
+    }
     setAiLoading(false);
   };
 
