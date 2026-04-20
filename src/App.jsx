@@ -202,7 +202,8 @@ export default function App() {
 useEffect(() => {
     const unsub = subscribeToData((d) => {
       if (d && d.projects) {
-        setData(d);
+        const clean = sanitize(d);
+        setData(clean);
         if (!initializedRef.current) {
           setActiveId(d.activeId || d.projects[0]?.id);
           initializedRef.current = true;
