@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const GEMINI_KEY = "AIzaSyBKSxvPhBZNoYGOaSCMT_zrRBCM9dQTpMs";
+const GEMINI_KEY = "your key here";
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 const STATUSES = {
